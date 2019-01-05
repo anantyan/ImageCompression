@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Image Compressing</string>
+    <string name="your_image">Your image</string>
+    <string name="choose_image">Choose Image</string>
+    <string name="landscape">Image is Landscape</string>
+    <string name="potrait">Image is potrait</string>
+</resources>
