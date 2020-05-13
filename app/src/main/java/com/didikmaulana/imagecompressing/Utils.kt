@@ -2,8 +2,13 @@ package com.didikmaulana.imagecompressing
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Environment
 import android.util.Base64
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun Bitmap.toBase64(): String {
     val byteArrayOutputStream = ByteArrayOutputStream()
@@ -45,4 +50,21 @@ fun Bitmap.resize(maxWidth: Int, maxHeight: Int): Bitmap {
 fun String.toBitmap(): Bitmap {
     val decodedString = Base64.decode(split(",")[1], Base64.DEFAULT)
     return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+}
+
+fun Bitmap.savePath(): FileOutputStream {
+    val str_path: String = Environment.getExternalStorageDirectory().absolutePath+"/File Percobaan"
+    val dir_path = File(str_path)
+    if(!dir_path.exists()) {
+        dir_path.mkdirs()
+    }
+    val file = File(dir_path, generateName()+".jpg")
+    val fout = FileOutputStream(file)
+    return fout
+}
+
+fun Bitmap.generateName(): String {
+    val formatter = SimpleDateFormat("yyyyddMMHHmmss");
+    val date = Date();
+    return formatter.format(date)
 }

@@ -1,11 +1,15 @@
 package com.didikmaulana.imagecompressing
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
@@ -17,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val GALLERY = 1
         const val CAMERA = 2
+        const val PERMISSION_ALLOW = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +31,40 @@ class MainActivity : AppCompatActivity() {
         // button picker click
         btn_picker.setOnClickListener {
             showPictureDialog()
+
+            // check permission android
+            permissionGranted()
+        }
+    }
+
+    private fun permissionGranted() {
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        } else {
+            permissionAllowed()
+        }
+    }
+
+    private fun permissionAllowed() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET) &&
+            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) &&
+            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
+            ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            ActivityCompat.requestPermissions(this, arrayOf(
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                ), PERMISSION_ALLOW)
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                ), PERMISSION_ALLOW)
         }
     }
 
@@ -58,6 +97,16 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, CAMERA)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_ALLOW) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            } else {
+                onBackPressed()
+            }
+        }
+    }
+
     // activity result
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -77,10 +126,15 @@ class MainActivity : AppCompatActivity() {
                         txt_orientation.text = getString(R.string.potrait)
                     }
                     // resized bitmap accoding orientation
-                    val resizedBitmap = bitmap.getOrientation(bitmap, width, height)
+                    // val resizedBitmap = bitmap.getOrientation(bitmap, width, height)
+
                     // convert bitmap to base64 encryption
-                    val base64String = resizedBitmap.toBase64()
-                    base64Img = base64String
+                    // val base64String = resizedBitmap.toBase64()
+                    // base64Img = base64String
+
+                    // show file path
+                    val fout = bitmap.savePath()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fout)
                 } catch (e: IOException) {
                     e.printStackTrace()
                     Toast.makeText(this, "Load Failed !", Toast.LENGTH_SHORT).show()
@@ -99,10 +153,15 @@ class MainActivity : AppCompatActivity() {
                     txt_orientation.text = getString(R.string.potrait)
                 }
                 // resized bitmap according orientation
-                val resizedBitmap = thumbnail.getOrientation(thumbnail, width, height)
+                // val resizedBitmap = thumbnail.getOrientation(thumbnail, width, height)
+
                 // convert bitmap to base64 encryption
-                val base64String = resizedBitmap.toBase64()
-                base64Img = base64String
+                // val base64String = resizedBitmap.toBase64()
+                // base64Img = base64String
+
+                // show file path
+                val fout = thumbnail.savePath()
+                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, fout)
             }
         }
     }
